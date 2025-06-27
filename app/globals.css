@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-green: #10b981;
+  --secondary-green: #d1fae5;
+  --primary-pink: #f472b6;
+  --secondary-pink: #fce7f3;
+  --soft-beige: #faf7f2;
+  --warm-white: #fefefe;
+}
+
+@layer base {
+  body {
+    background-color: var(--warm-white);
+    color: #374151;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105;
+  }
+
+  .btn-whatsapp {
+    @apply bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105 flex items-center gap-2;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  .gradient-bg {
+    background: linear-gradient(135deg, #d1fae5 0%, #fef7f7 50%, #fce7f3 100%);
+  }
+}
