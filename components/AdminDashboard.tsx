@@ -18,6 +18,7 @@ import {
   SettingsIcon,
 } from "lucide-react"
 import ProductForm from "./ProductForm"
+import BrandForm from "./BrandForm"
 import AdminSettings from "./AdminSettings"
 import Image from "next/image"
 
@@ -28,14 +29,19 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState("dashboard")
   const [products, setProducts] = useState<Product[]>([])
+  const [brands, setBrands] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [editingBrand, setEditingBrand] = useState<any | null>(null)
   const [showProductForm, setShowProductForm] = useState(false)
+  const [showBrandForm, setShowBrandForm] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedBrand, setSelectedBrand] = useState("all")
 
   useEffect(() => {
     fetchProducts()
+    fetchBrands()
   }, [])
 
   const fetchProducts = async () => {
@@ -48,6 +54,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
       console.error("Error fetching products:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchBrands = async () => {
+    try {
+      const { data, error } = await supabase.from("brands").select("*").order("created_at", { ascending: false })
+
+      if (error) throw error
+      setBrands(data || [])
+    } catch (error) {
+      console.error("Error fetching brands:", error)
     }
   }
 
@@ -88,17 +105,55 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     fetchProducts()
   }
 
+  const handleDeleteBrand = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this brand?")) return
+
+    try {
+      const res = await fetch(`/api/admin/brands?id=${id}`, { method: "DELETE" })
+      if (!res.ok) {
+        const result = await res.json()
+        throw new Error(result.error || "Failed")
+      }
+
+      setBrands(brands.filter((b) => b.id !== id))
+    } catch (error) {
+      console.error("Error deleting brand:", error)
+      alert("Error deleting brand")
+    }
+  }
+
+  const handleEditBrand = (brand: any) => {
+    setEditingBrand(brand)
+    setShowBrandForm(true)
+  }
+
+  const handleAddBrand = () => {
+    setEditingBrand(null)
+    setShowBrandForm(true)
+  }
+
+  const handleBrandSaved = () => {
+    setShowBrandForm(false)
+    setEditingBrand(null)
+    fetchBrands()
+  }
+
   const categories = [...new Set(products.map((p) => p.category))].filter(Boolean)
+  const uniqueBrandNames = [...new Set(products.map((p) => p.brand?.name).filter(Boolean))]
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (product.brand?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+                         product.category.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-    return matchesSearch && matchesCategory
+    const matchesBrand = selectedBrand === "all" || product.brand?.name === selectedBrand
+    return matchesSearch && matchesCategory && matchesBrand
   })
 
   // Calculate real stats from actual data
   const stats = {
     totalProducts: products.length,
     totalCategories: categories.length,
+    totalBrands: uniqueBrandNames.length,
     avgPrice: products.length > 0 ? products.reduce((sum, p) => sum + p.price, 0) / products.length : 0,
     totalValue: products.reduce((sum, p) => sum + p.price, 0),
     recentProducts: products.filter((p) => {
@@ -180,6 +235,27 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                     }`}
                   >
                     {products.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setActiveTab("brands")}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all whitespace-nowrap ${
+                  activeTab === "brands"
+                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                <Package size={20} />
+                <span className="font-medium">Brands</span>
+                {brands.length > 0 && (
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      activeTab === "brands" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    {brands.length}
                   </span>
                 )}
               </button>
@@ -432,23 +508,42 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                           className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
                         />
                       </div>
-                      {categories.length > 0 && (
-                        <div className="flex items-center gap-2">
-                          <Filter size={20} className="text-gray-600" />
-                          <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
-                          >
-                            <option value="all">All Categories</option>
-                            {categories.map((category) => (
-                              <option key={category} value={category}>
-                                {category}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {categories.length > 0 && (
+                          <div className="flex items-center gap-2 flex-1">
+                            <Filter size={20} className="text-gray-600" />
+                            <select
+                              value={selectedCategory}
+                              onChange={(e) => setSelectedCategory(e.target.value)}
+                              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
+                            >
+                              <option value="all">All Categories</option>
+                              {categories.map((category) => (
+                                <option key={category} value={category}>
+                                  {category}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        {brands.length > 0 && (
+                          <div className="flex items-center gap-2 flex-1">
+                            <span className="text-sm font-medium text-gray-600">Brand:</span>
+                            <select
+                              value={selectedBrand}
+                              onChange={(e) => setSelectedBrand(e.target.value)}
+                              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
+                            >
+                              <option value="all">All Brands</option>
+                              {brands.map((brand) => (
+                                <option key={brand} value={brand}>
+                                  {brand}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -474,7 +569,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                               />
                               <div className="flex-1 min-w-0">
                                 <h4 className="font-medium text-gray-800 text-sm truncate">{product.name}</h4>
-                                <p className="text-xs text-gray-600 mb-1">{product.category}</p>
+                                <div className="flex gap-2 mb-1">
+                                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    {product.category}
+                                  </span>
+                                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {product.brand?.name}
+                                  </span>
+                                </div>
                                 <p className="font-semibold text-gray-800">${product.price.toFixed(2)}</p>
                                 <p className="text-xs text-gray-500">
                                   {new Date(product.created_at).toLocaleDateString()}
@@ -525,6 +627,9 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                                   Category
                                 </th>
                                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  Brand
+                                </th>
+                                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Price
                                 </th>
                                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -558,6 +663,11 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
                                       {product.category}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                     {product.brand?.name}
                                     </span>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -632,11 +742,114 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             </div>
           )}
 
+          {activeTab === "brands" && !showBrandForm && (
+            <div className="space-y-6">
+              {/* Brands Header */}
+              <div className="flex flex-col gap-4">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Brands</h2>
+                  <p className="text-gray-600 text-sm sm:text-base">
+                    {brands.length === 0
+                      ? "Start building your brand catalog"
+                      : `Manage your ${brands.length} brands`}
+                  </p>
+                </div>
+                <button
+                  onClick={handleAddBrand}
+                  className="flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-colors shadow-sm w-full sm:w-auto"
+                >
+                  <Plus size={20} />
+                  Add New Brand
+                </button>
+              </div>
+
+              {brands.length > 0 && (
+                <>
+                  {/* Brands Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {brands.map((brand) => (
+                      <div key={brand.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-4 mb-4">
+                          {brand.logo_url && (
+                            <Image
+                              src={brand.logo_url}
+                              alt={brand.name}
+                              width={60}
+                              height={60}
+                              className="w-15 h-15 rounded-lg object-cover"
+                            />
+                          )}
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-800 text-lg">{brand.name}</h3>
+                            <p className="text-gray-600 text-sm">{brand.slug}</p>
+                          </div>
+                        </div>
+                        
+                        {brand.description && (
+                          <p className="text-gray-600 text-sm mb-4 line-clamp-2">{brand.description}</p>
+                        )}
+                        
+
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                          <span className="text-xs text-gray-500">
+                            {new Date(brand.created_at).toLocaleDateString()}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleEditBrand(brand)}
+                              className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                              title="Edit Brand"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBrand(brand.id)}
+                              className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete Brand"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Empty State for Brands Tab */}
+              {brands.length === 0 && !loading && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 sm:p-12 text-center">
+                  <Package size={64} className="text-gray-400 mx-auto mb-6" />
+                  <h3 className="text-xl font-semibold text-gray-800 mb-3">No brands yet</h3>
+                  <p className="text-gray-500 mb-8 max-w-md mx-auto text-sm sm:text-base">
+                    Start building your brand catalog by adding your first brand. You can add brand logos, descriptions, and website links.
+                  </p>
+                  <button
+                    onClick={handleAddBrand}
+                    className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg transition-colors text-lg w-full sm:w-auto"
+                  >
+                    Add Your First Brand
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {showProductForm && (
             <ProductForm
               product={editingProduct}
+              brands={brands}
               onSave={handleProductSaved}
               onCancel={() => setShowProductForm(false)}
+            />
+          )}
+
+          {showBrandForm && (
+            <BrandForm
+              brand={editingBrand}
+              onSave={handleBrandSaved}
+              onCancel={() => setShowBrandForm(false)}
             />
           )}
         </main>

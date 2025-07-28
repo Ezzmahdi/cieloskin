@@ -43,9 +43,23 @@ export type Product = {
   description: string
   short_description: string
   category: string
+  brand_id: string
   image_url: string
   slug: string
   whatsapp_message: string
+  created_at: string
+  updated_at: string
+  // Relations
+  brand?: Brand
+}
+
+export type Brand = {
+  id: string
+  name: string
+  slug: string
+  logo_url: string
+  description?: string
+  website_url?: string
   created_at: string
   updated_at: string
 }

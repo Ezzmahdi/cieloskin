@@ -5,13 +5,16 @@ import { supabase, type Product } from "@/lib/supabase"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import ProductGrid from "@/components/ProductGrid"
+import BrandCarousel from "@/components/BrandCarousel"
 import { Search, Filter } from "lucide-react"
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<string[]>([])
+  const [brands, setBrands] = useState<string[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [selectedBrand, setSelectedBrand] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(true)
 
@@ -21,7 +24,7 @@ export default function ProductsPage() {
 
   useEffect(() => {
     filterProducts()
-  }, [products, selectedCategory, searchQuery])
+  }, [products, selectedCategory, selectedBrand, searchQuery])
 
   const fetchProducts = async () => {
     try {
@@ -34,9 +37,11 @@ export default function ProductsPage() {
 
       setProducts(productsData || [])
 
-      // Extract unique categories
+      // Extract unique categories and brands
       const uniqueCategories = [...new Set(productsData?.map((p) => p.category) || [])]
+      const uniqueBrands = [...new Set(productsData?.map((p) => p.brand) || [])]
       setCategories(uniqueCategories)
+      setBrands(uniqueBrands)
     } catch (error) {
       console.error("Error fetching products:", error)
     } finally {
@@ -52,16 +57,34 @@ export default function ProductsPage() {
       filtered = filtered.filter((product) => product.category === selectedCategory)
     }
 
+    // Filter by brand
+    if (selectedBrand !== "all") {
+      filtered = filtered.filter((product) => product.brand?.name === selectedBrand)
+    }
+
     // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
         (product) =>
           product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description.toLowerCase().includes(searchQuery.toLowerCase()),
+          product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.brand?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     }
 
     setFilteredProducts(filtered)
+  }
+
+  const handleBrandClick = (brandName: string) => {
+    if (brandName === "all") {
+      setSelectedBrand("all")
+    } else {
+      setSelectedBrand(brandName)
+    }
+    // Clear search query when filtering by brand
+    setSearchQuery("")
+    setSelectedCategory("all")
   }
 
   if (loading) {
@@ -93,27 +116,35 @@ export default function ProductsPage() {
             </p>
           </div>
 
+          {/* Brand Carousel */}
+          <BrandCarousel onBrandClick={handleBrandClick} selectedBrand={selectedBrand} />
+
           {/* Search and Filter */}
-          <div className="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="mb-8 space-y-4">
             {/* Search */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <div className="relative max-w-2xl mx-auto">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search by product name, brand, category, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300"
+                className="w-full pl-12 pr-4 py-4 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 text-lg"
               />
             </div>
 
-            {/* Category Filter */}
-            <div className="flex items-center gap-2">
-              <Filter size={20} className="text-gray-600" />
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+              <div className="flex items-center gap-2">
+                <Filter size={20} className="text-gray-600" />
+                <span className="text-sm font-medium text-gray-700">Filters:</span>
+              </div>
+              
+              {/* Category Filter */}
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-3 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300"
+                className="px-4 py-2 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"
               >
                 <option value="all">All Categories</option>
                 {categories.map((category) => (
@@ -122,6 +153,34 @@ export default function ProductsPage() {
                   </option>
                 ))}
               </select>
+
+              {/* Brand Filter */}
+              <select
+                value={selectedBrand}
+                onChange={(e) => setSelectedBrand(e.target.value)}
+                className="px-4 py-2 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"
+              >
+                <option value="all">All Brands</option>
+                {brands.map((brand) => (
+                  <option key={brand} value={brand}>
+                    {brand}
+                  </option>
+                ))}
+              </select>
+
+              {/* Clear Filters */}
+              {(selectedCategory !== "all" || selectedBrand !== "all" || searchQuery) && (
+                <button
+                  onClick={() => {
+                    setSelectedCategory("all")
+                    setSelectedBrand("all")
+                    setSearchQuery("")
+                  }}
+                  className="px-4 py-2 text-sm text-pink-600 hover:text-pink-800 hover:bg-pink-50 rounded-full transition-colors"
+                >
+                  Clear All
+                </button>
+              )}
             </div>
           </div>
 

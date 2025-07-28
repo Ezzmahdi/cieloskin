@@ -2,23 +2,25 @@
 
 import type React from "react"
 import { useState, useRef } from "react"
-import { supabase, type Product } from "@/lib/supabase"
+import { supabase, type Product, type Brand } from "@/lib/supabase"
 import { Upload, X, Save, ArrowLeft, ImageIcon } from "lucide-react"
 import Image from "next/image"
 
 interface ProductFormProps {
   product?: Product | null
+  brands: Brand[]
   onSave: () => void
   onCancel: () => void
 }
 
-export default function ProductForm({ product, onSave, onCancel }: ProductFormProps) {
+export default function ProductForm({ product, brands, onSave, onCancel }: ProductFormProps) {
   const [formData, setFormData] = useState({
     name: product?.name || "",
     price: product?.price || 0,
     description: product?.description || "",
     short_description: product?.short_description || "",
     category: product?.category || "",
+    brand_id: product?.brand_id || "",
     slug: product?.slug || "",
     whatsapp_message: product?.whatsapp_message || "",
     image_url: product?.image_url || "",
@@ -265,18 +267,24 @@ export default function ProductForm({ product, onSave, onCancel }: ProductFormPr
                   />
                 </div>
 
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">URL Slug *</label>
-                  <input
-                    type="text"
-                    value={formData.slug}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
-                    placeholder="product-url-slug"
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Brand *</label>
+                  <select
+                    value={formData.brand_id}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, brand_id: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent bg-white"
                     required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">This will be used in the product URL</p>
+                  >
+                    <option value="" disabled>Select a brand</option>
+                    {brands.map((brand) => (
+                      <option key={brand.id} value={brand.id}>
+                        {brand.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+
               </div>
             </div>
 
