@@ -143,17 +143,17 @@ export default function ProductsPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
-              <div className="flex items-center gap-2">
-                <Filter size={20} className="text-gray-600" />
-                <span className="text-sm font-medium text-gray-700">Filters:</span>
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+              <div className="flex items-center gap-1 sm:gap-2">
+                <Filter size={16} className="text-gray-600" />
+                <span className="text-xs sm:text-sm font-medium text-gray-700">Filters:</span>
               </div>
               
               {/* Category Filter */}
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white min-w-0 flex-shrink"
               >
                 <option value="all">All Categories</option>
                 {categories.map((category) => (
@@ -167,7 +167,7 @@ export default function ProductsPage() {
               <select
                 value={selectedBrand}
                 onChange={(e) => setSelectedBrand(e.target.value)}
-                className="px-4 py-2 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white"
+                className="px-3 py-1.5 sm:px-4 sm:py-2 text-sm border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 bg-white min-w-0 flex-shrink"
               >
                 <option value="all">All Brands</option>
                 {brands.map((brand) => (
@@ -185,7 +185,7 @@ export default function ProductsPage() {
                     setSelectedBrand("all")
                     setSearchQuery("")
                   }}
-                  className="px-4 py-2 text-sm text-pink-600 hover:text-pink-800 hover:bg-pink-50 rounded-full transition-colors"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-pink-600 hover:text-pink-800 hover:bg-pink-50 rounded-full transition-colors whitespace-nowrap"
                 >
                   Clear All
                 </button>

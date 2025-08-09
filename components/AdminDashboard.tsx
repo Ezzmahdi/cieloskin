@@ -166,71 +166,65 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Enhanced Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="px-4 sm:px-6 py-4">
+      {/* Mobile-First Header */}
+      <header className="bg-white shadow-sm border-b sticky top-0 z-40">
+        <div className="px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Image
                 src="/images/cieloskin-logo-new.png"
                 alt="CieloSkin Logo"
-                width={40}
-                height={40}
-                className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                width={32}
+                height={32}
+                className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
               />
               <div>
-                <h1 className="text-lg sm:text-xl font-bold text-gray-800">CieloSkin Admin</h1>
-                <p className="text-xs sm:text-sm text-gray-600 hidden sm:block">Manage your skincare products</p>
+                <h1 className="text-base sm:text-lg font-bold text-gray-800">Admin</h1>
+                <p className="text-xs text-gray-500 hidden sm:block">CieloSkin Dashboard</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="hidden md:flex items-center gap-2 bg-gray-100 px-3 py-2 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-gray-600">Admin Online</span>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 text-gray-600 hover:text-red-600 transition-colors px-2 sm:px-3 py-2 rounded-lg hover:bg-red-50"
-              >
-                <LogOut size={16} />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1 sm:gap-2 text-gray-600 hover:text-red-600 transition-colors px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg hover:bg-red-50"
+            >
+              <LogOut size={14} className="sm:w-4 sm:h-4" />
+              <span className="text-xs sm:text-sm">Exit</span>
+            </button>
           </div>
         </div>
       </header>
 
       <div className="flex flex-col lg:flex-row">
         {/* Enhanced Sidebar */}
-        <aside className="w-full lg:w-64 bg-white shadow-sm border-b lg:border-r lg:border-b-0 lg:min-h-screen">
-          <nav className="p-4">
-            <div className="flex lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 overflow-x-auto lg:overflow-x-visible">
+        <aside className="w-full lg:w-64 bg-white shadow-sm border-b lg:border-r lg:border-b-0">
+          <nav className="p-2 sm:p-4">
+            <div className="flex lg:flex-col gap-1 sm:gap-2 lg:gap-2 overflow-x-auto lg:overflow-x-visible pb-1 lg:pb-0">
               <button
                 onClick={() => setActiveTab("dashboard")}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl transition-all whitespace-nowrap text-sm sm:text-base ${
                   activeTab === "dashboard"
-                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                <LayoutDashboard size={20} />
+                <LayoutDashboard size={16} className="sm:w-5 sm:h-5" />
                 <span className="font-medium">Dashboard</span>
               </button>
 
               <button
                 onClick={() => setActiveTab("products")}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl transition-all whitespace-nowrap text-sm sm:text-base ${
                   activeTab === "products"
-                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                <Package size={20} />
+                <Package size={16} className="sm:w-5 sm:h-5" />
                 <span className="font-medium">Products</span>
                 {products.length > 0 && (
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${
+                    className={`text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full ${
                       activeTab === "products" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
                     }`}
                   >
@@ -241,17 +235,17 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
               <button
                 onClick={() => setActiveTab("brands")}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl transition-all whitespace-nowrap text-sm sm:text-base ${
                   activeTab === "brands"
-                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                <Package size={20} />
+                <Package size={16} className="sm:w-5 sm:h-5" />
                 <span className="font-medium">Brands</span>
                 {brands.length > 0 && (
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${
+                    className={`text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full ${
                       activeTab === "brands" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
                     }`}
                   >
@@ -262,21 +256,21 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
               <button
                 onClick={() => setActiveTab("settings")}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all whitespace-nowrap ${
+                className={`flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl transition-all whitespace-nowrap text-sm sm:text-base ${
                   activeTab === "settings"
-                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                <SettingsIcon size={20} />
+                <SettingsIcon size={16} className="sm:w-5 sm:h-5" />
                 <span className="font-medium">Settings</span>
               </button>
             </div>
           </nav>
         </aside>
 
-        {/* Enhanced Main Content */}
-        <main className="flex-1 p-4 sm:p-6">
+        {/* Mobile-First Main Content */}
+        <main className="flex-1 p-3 sm:p-4 lg:p-6">
           {activeTab === "settings" && <AdminSettings />}
 
           {activeTab === "dashboard" && !showProductForm && (
