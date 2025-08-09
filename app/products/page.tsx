@@ -123,7 +123,7 @@ export default function ProductsPage() {
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">Our Products</h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Explore our complete collection of premium skincare products
+              Explore our complete collection of premium products
             </p>
           </div>
 
