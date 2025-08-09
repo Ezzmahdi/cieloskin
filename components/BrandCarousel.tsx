@@ -65,22 +65,27 @@ export default function BrandCarousel({ onBrandClick, selectedBrand }: BrandCaro
   }
 
   // Create display array - if few brands, show them centered; if many, create infinite scroll
-  const shouldScroll = brands.length > 6
-  const displayBrands = shouldScroll ? [...brands, ...brands, ...brands] : brands
+  const shouldScroll = brands.length > 1
+  // Duplicate multiple times to ensure visible movement even with few brands
+  const copies = 6
+  const displayBrands = shouldScroll
+    ? Array.from({ length: copies }).flatMap(() => brands)
+    : brands
 
   return (
     <div className="py-6">
-      <div className="relative">
-        <div className="overflow-hidden">
+      <div className="relative carousel-group">
+        <div className="overflow-hidden mask-fade-x">
           <div 
             ref={carouselRef}
-            className={`flex items-center gap-6 ${
+            className={`flex items-center gap-10 ${
               shouldScroll 
                 ? 'animate-infinite-scroll' 
                 : 'justify-center'
             }`}
             style={{
-              animationDuration: shouldScroll ? `${brands.length * 4}s` : undefined
+              // Smooth, readable pace; minimum duration to avoid being too fast with few brands
+              animationDuration: shouldScroll ? `${Math.max(20, brands.length * 2.5)}s` : undefined
             }}
           >
             {displayBrands.map((brand, index) => {
@@ -98,24 +103,24 @@ export default function BrandCarousel({ onBrandClick, selectedBrand }: BrandCaro
                   }`}
                   title={`Filter by ${brand.name}`}
                 >
-                  <div className="w-16 h-16 bg-white rounded-xl shadow-sm border border-gray-100 p-2 group-hover:shadow-md transition-all group-hover:border-green-200">
+                  <div className="w-24 h-24 bg-white rounded-2xl shadow-sm border border-gray-100 p-3 group-hover:shadow-md transition-all group-hover:border-green-200">
                     {brand.logo_url ? (
                       <Image
                         src={brand.logo_url}
                         alt={brand.name}
-                        width={64}
-                        height={64}
+                        width={96}
+                        height={96}
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                        <span className="text-gray-500 text-sm font-semibold">
+                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+                        <span className="text-gray-500 text-base font-semibold">
                           {brand.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
                     )}
                   </div>
-                  <p className="text-xs text-gray-600 mt-2 text-center font-medium group-hover:text-green-600 transition-colors truncate max-w-[64px]">
+                  <p className="text-sm text-gray-600 mt-2 text-center font-medium group-hover:text-green-600 transition-colors truncate max-w-[96px]">
                     {brand.name}
                   </p>
                 </button>
