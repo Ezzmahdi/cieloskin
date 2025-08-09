@@ -536,8 +536,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                             >
                               <option value="all">All Brands</option>
                               {brands.map((brand) => (
-                                <option key={brand} value={brand}>
-                                  {brand}
+                                <option key={brand.id} value={brand.name}>
+                                  {brand.name}
                                 </option>
                               ))}
                             </select>

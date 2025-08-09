@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase, type Product } from "@/lib/supabase"
+import { supabase, type Product, type Brand } from "@/lib/supabase"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import ProductGrid from "@/components/ProductGrid"
@@ -12,7 +12,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<string[]>([])
-  const [brands, setBrands] = useState<string[]>([])
+  const [brands, setBrands] = useState<Brand[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [selectedBrand, setSelectedBrand] = useState<string>("all")
   const [searchQuery, setSearchQuery] = useState("")
@@ -28,22 +28,33 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const { data: productsData, error } = await supabase
+      // Fetch products with brand information
+      const { data: productsData, error: productsError } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          *,
+          brand:brands(id, name, slug, logo_url)
+        `)
         .order("created_at", { ascending: false })
 
-      if (error) throw error
+      if (productsError) throw productsError
 
       setProducts(productsData || [])
 
-      // Extract unique categories and brands
+      // Fetch all brands separately for the filter dropdown
+      const { data: brandsData, error: brandsError } = await supabase
+        .from("brands")
+        .select("*")
+        .order("name")
+
+      if (brandsError) throw brandsError
+
+      // Extract unique categories from products
       const uniqueCategories = [...new Set(productsData?.map((p) => p.category) || [])]
-      const uniqueBrands = [...new Set(productsData?.map((p) => p.brand) || [])]
       setCategories(uniqueCategories)
-      setBrands(uniqueBrands)
+      setBrands(brandsData || [])
     } catch (error) {
-      console.error("Error fetching products:", error)
+      console.error("Error fetching data:", error)
     } finally {
       setLoading(false)
     }
@@ -162,8 +173,8 @@ export default function ProductsPage() {
               >
                 <option value="all">All Brands</option>
                 {brands.map((brand) => (
-                  <option key={brand} value={brand}>
-                    {brand}
+                  <option key={brand.id} value={brand.name}>
+                    {brand.name}
                   </option>
                 ))}
               </select>

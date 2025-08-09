@@ -48,12 +48,25 @@
     animation: scroll 30s linear infinite;
   }
 
+  .animate-infinite-scroll {
+    animation: infinite-scroll linear infinite;
+  }
+
   @keyframes scroll {
     0% {
       transform: translateX(0);
     }
     100% {
       transform: translateX(-50%);
+    }
+  }
+
+  @keyframes infinite-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
     }
   }
 }

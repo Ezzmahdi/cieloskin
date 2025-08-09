@@ -1,3 +1,15 @@
+-- Create brands table first (referenced by products)
+CREATE TABLE IF NOT EXISTS brands (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  logo_url TEXT,
+  description TEXT,
+  website_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Create products table
 CREATE TABLE IF NOT EXISTS products (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -6,6 +18,7 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT NOT NULL,
   short_description TEXT NOT NULL,
   category VARCHAR(100) NOT NULL,
+  brand_id UUID REFERENCES brands(id),
   image_url TEXT,
   slug VARCHAR(255) UNIQUE NOT NULL,
   whatsapp_message TEXT,
@@ -17,6 +30,17 @@ CREATE TABLE IF NOT EXISTS products (
 INSERT INTO storage.buckets (id, name, public) 
 VALUES ('product-images', 'product-images', true)
 ON CONFLICT (id) DO NOTHING;
+
+-- Set up RLS policies for brands table
+ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
+
+-- Allow public read access to brands
+CREATE POLICY "Public can view brands" ON brands
+  FOR SELECT USING (true);
+
+-- Allow authenticated users to insert/update/delete brands
+CREATE POLICY "Authenticated users can manage brands" ON brands
+  FOR ALL USING (auth.role() = 'authenticated');
 
 -- Set up RLS policies for products table
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
