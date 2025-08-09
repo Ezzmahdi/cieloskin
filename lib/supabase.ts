@@ -18,15 +18,16 @@ export function getSupabaseClient() {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     /* eslint-disable no-console */
-    console.warn(
-      "⚠️  Supabase env vars are missing – using mock client. " +
-        "Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY " +
-        "to .env.local for full functionality.",
+    console.error(
+      "❌ Supabase configuration error: Missing environment variables.\n" +
+        "Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to your .env.local file.\n" +
+        "Without these, the application cannot connect to Supabase."
     )
     
-    // Create a mock client with a non-existent URL to prevent actual requests
-    supabaseClient = createClient("https://mock.supabase.co", "mock-key")
-    return supabaseClient
+    // Throw an error instead of creating a mock client
+    throw new Error(
+      "Supabase configuration incomplete. Please check your environment variables."
+    )
   }
 
   supabaseClient = createClient(supabaseUrl, supabaseAnonKey)

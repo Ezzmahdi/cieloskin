@@ -50,35 +50,65 @@ export default function ProductForm({ product, brands, onSave, onCancel }: Produ
     const file = event.target.files?.[0]
     if (!file) return
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file.')
+      return
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB.')
+      return
+    }
+
     setUploading(true)
     try {
+      console.log('Starting upload for file:', file.name, 'Size:', file.size, 'Type:', file.type)
+      
       const fileExt = file.name.split(".").pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `${fileName}`
+      const filePath = `products/${fileName}` // Add folder structure
+
+      console.log('Uploading to path:', filePath)
+      console.log('Attempting direct upload to media bucket...')
 
       // Upload file to Supabase storage
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("media")
         .upload(filePath, file, {
           cacheControl: "3600",
           upsert: false,
         })
 
       if (uploadError) {
-        console.error("Upload error:", uploadError)
-        throw uploadError
+        console.error("Upload error details:", {
+          message: uploadError.message,
+          error: uploadError,
+          filePath,
+          fileSize: file.size,
+          fileType: file.type
+        })
+        throw new Error(`Upload failed: ${uploadError.message}`)
       }
 
+      console.log('Upload successful:', uploadData)
+
       // Get public URL
-      const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(filePath)
+      const { data: urlData } = supabase.storage.from("media").getPublicUrl(filePath)
+      
+      console.log('Public URL generated:', urlData.publicUrl)
 
       setFormData((prev) => ({
         ...prev,
         image_url: urlData.publicUrl,
       }))
+      
+      alert('Image uploaded successfully!')
     } catch (error) {
       console.error("Error uploading image:", error)
-      alert("Error uploading image. Please try again.")
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Error uploading image: ${errorMessage}`)
     } finally {
       setUploading(false)
     }

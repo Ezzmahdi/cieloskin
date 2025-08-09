@@ -34,6 +34,7 @@ export default function BrandForm({ brand, onSave, onCancel }: BrandFormProps) {
   }
 
   const handleNameChange = (name: string) => {
+    console.log('Name change triggered:', name)
     setFormData((prev) => ({
       ...prev,
       name,
@@ -45,35 +46,65 @@ export default function BrandForm({ brand, onSave, onCancel }: BrandFormProps) {
     const file = event.target.files?.[0]
     if (!file) return
 
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file.')
+      return
+    }
+
+    // Validate file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB.')
+      return
+    }
+
     setUploading(true)
     try {
+      console.log('Starting upload for file:', file.name, 'Size:', file.size, 'Type:', file.type)
+      
       const fileExt = file.name.split(".").pop()
       const fileName = `brand-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
-      const filePath = `${fileName}`
+      const filePath = `brands/${fileName}` // Add folder structure
+
+      console.log('Uploading to path:', filePath)
+      console.log('Attempting direct upload to media bucket...')
 
       // Upload file to Supabase storage
-      const { error: uploadError } = await supabase.storage
-        .from("brand-logos")
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("media")
         .upload(filePath, file, {
           cacheControl: "3600",
           upsert: false,
         })
 
       if (uploadError) {
-        console.error("Upload error:", uploadError)
-        throw uploadError
+        console.error("Upload error details:", {
+          message: uploadError.message,
+          error: uploadError,
+          filePath,
+          fileSize: file.size,
+          fileType: file.type
+        })
+        throw new Error(`Upload failed: ${uploadError.message}`)
       }
 
+      console.log('Upload successful:', uploadData)
+
       // Get public URL
-      const { data: urlData } = supabase.storage.from("brand-logos").getPublicUrl(filePath)
+      const { data: urlData } = supabase.storage.from("media").getPublicUrl(filePath)
+      
+      console.log('Public URL generated:', urlData.publicUrl)
 
       setFormData((prev) => ({
         ...prev,
         logo_url: urlData.publicUrl,
       }))
+      
+      alert('Logo uploaded successfully!')
     } catch (error) {
       console.error("Error uploading logo:", error)
-      alert("Error uploading logo. Please try again.")
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      alert(`Error uploading logo: ${errorMessage}`)
     } finally {
       setUploading(false)
     }
@@ -223,16 +254,29 @@ export default function BrandForm({ brand, onSave, onCancel }: BrandFormProps) {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => handleNameChange(e.target.value)}
+                    onChange={(e) => {
+                      console.log('Input onChange event:', e.target.value)
+                      handleNameChange(e.target.value)
+                    }}
+                    onFocus={() => console.log('Name input focused')}
+                    onBlur={() => console.log('Name input blurred')}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
                     placeholder="Enter brand name"
                     required
+                    autoComplete="off"
                   />
                 </div>
 
-
-
-
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Brand Slug</label>
+                  <input
+                    type="text"
+                    value={formData.slug}
+                    readOnly
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600"
+                    placeholder="Auto-generated from brand name"
+                  />
+                </div>
               </div>
             </div>
 
@@ -243,10 +287,16 @@ export default function BrandForm({ brand, onSave, onCancel }: BrandFormProps) {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) => {
+                    console.log('Description change:', e.target.value)
+                    setFormData((prev) => ({ ...prev, description: e.target.value }))
+                  }}
+                  onFocus={() => console.log('Description textarea focused')}
+                  onBlur={() => console.log('Description textarea blurred')}
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent resize-none"
                   placeholder="Brief description about the brand..."
+                  autoComplete="off"
                 />
               </div>
             </div>
