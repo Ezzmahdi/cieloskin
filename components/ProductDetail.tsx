@@ -43,7 +43,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       try {
         await navigator.share({
           title: product.name,
-          text: product.short_description,
+          text: product.description,
           url: window.location.href,
         })
       } catch (error) {
@@ -96,6 +96,15 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 {product.description}
               </p>
             </div>
+
+            {Boolean((product as any).how_to_use) && (
+              <div className="mb-8">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3">How to Use</h2>
+                <p className="text-gray-600 leading-relaxed whitespace-pre-line text-sm sm:text-base">
+                  {(product as any).how_to_use}
+                </p>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex flex-col gap-4 mt-auto">

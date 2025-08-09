@@ -42,7 +42,7 @@ export type Product = {
   name: string
   price: number
   description: string
-  short_description: string
+  how_to_use?: string
   category: string
   brand_id: string
   image_url: string

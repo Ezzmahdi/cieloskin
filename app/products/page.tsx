@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { supabase, type Product, type Brand } from "@/lib/supabase"
 import Header from "@/components/Header"
-import Footer from "@/components/Footer"
 import ProductGrid from "@/components/ProductGrid"
 import BrandCarousel from "@/components/BrandCarousel"
 import { Search, Filter } from "lucide-react"
@@ -108,7 +107,6 @@ export default function ProductsPage() {
             <p className="mt-4 text-gray-600">Loading products...</p>
           </div>
         </div>
-        <Footer />
       </div>
     )
   }
@@ -117,12 +115,12 @@ export default function ProductsPage() {
     <div className="min-h-screen">
       <Header />
 
-      <main className="py-8">
+      <main className="py-6 sm:py-8">
         <div className="container mx-auto px-4">
           {/* Page Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">Our Products</h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">Our Products</h1>
+            <p className="text-gray-600 max-w-2xl mx-auto text-sm sm:text-base">
               Explore our complete collection of premium products
             </p>
           </div>
@@ -140,7 +138,7 @@ export default function ProductsPage() {
                 placeholder="Search by product name, brand, category, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 text-lg"
+                className="w-full pl-12 pr-4 py-3 sm:py-4 border border-pink-200 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300 text-base sm:text-lg"
               />
             </div>
 
@@ -206,8 +204,6 @@ export default function ProductsPage() {
           <ProductGrid products={filteredProducts} />
         </div>
       </main>
-
-      <Footer />
     </div>
   )
 }

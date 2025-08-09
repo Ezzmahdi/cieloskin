@@ -18,7 +18,7 @@ export default function ProductForm({ product, brands, onSave, onCancel }: Produ
     name: product?.name || "",
     price: product?.price || 0,
     description: product?.description || "",
-    short_description: product?.short_description || "",
+    how_to_use: (product as any)?.how_to_use || "",
     category: product?.category || "",
     brand_id: product?.brand_id || "",
     slug: product?.slug || "",
@@ -323,18 +323,6 @@ export default function ProductForm({ product, brands, onSave, onCancel }: Produ
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Product Descriptions</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Short Description *</label>
-                  <textarea
-                    value={formData.short_description}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, short_description: e.target.value }))}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
-                    placeholder="Brief description for product cards (1-2 sentences)"
-                    required
-                  />
-                </div>
-
-                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Full Description *</label>
                   <textarea
                     value={formData.description}
@@ -343,6 +331,17 @@ export default function ProductForm({ product, brands, onSave, onCancel }: Produ
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
                     placeholder="Detailed product description with benefits, ingredients, usage instructions..."
                     required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">How to Use</label>
+                  <textarea
+                    value={(formData as any).how_to_use}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, how_to_use: e.target.value }))}
+                    rows={5}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-transparent"
+                    placeholder="Usage instructions for best results"
                   />
                 </div>
               </div>

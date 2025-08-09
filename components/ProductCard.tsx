@@ -64,7 +64,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </h3>
         </Link>
 
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.short_description}</p>
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <span className="text-xl sm:text-2xl font-bold text-gray-800">${product.price.toFixed(2)}</span>

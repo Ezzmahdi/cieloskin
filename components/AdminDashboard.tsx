@@ -655,7 +655,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
                                       <div>
                                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                                         <div className="text-sm text-gray-500 max-w-xs truncate">
-                                          {product.short_description}
+                                          {product.description}
                                         </div>
                                       </div>
                                     </div>
